@@ -1,0 +1,85 @@
+name: Build Image On Hook
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "Type of servarr app"
+        required: true
+        type: string
+      pr_branch:
+        description: "PR branch to build"
+        required: true
+        type: string
+      pr_version:
+        description: "Version of branch"
+        required: true
+        type: string
+
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v4.0.1
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/prarr
+          labels: |
+            org.opencontainers.image.title=${{ github.event.inputs.app_name }}
+            org.opencontainers.image.description=${{ github.event.inputs.app_name }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.pr_branch }}
+            type=raw,value=${{ github.event.inputs.pr_branch }}-${{ github.event.inputs.pr_version }}
+          flavor: |
+            prefix=${{ github.event.inputs.app_name }}-,onlatest=true
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2.0.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate build date
+        id: gen_date
+        run: |
+          BUILD_DATE=$(date '+%Y-%m-%dT%H:%M:%S%:z')
+          echo "**** Setting build date to $BUILD_DATE ****"
+          echo ::set-output name=build_date::${BUILD_DATE}
+      - name: Generate outputs
+        id: gen_release
+        run: |
+          declare -A portmap=(["radarr"]="7878" ["readarr"]="8787" ["prowlarr"]="9696" ["lidarr"]="8686" ["whisparr"]="6969")
+          echo ::set-output name=app_port::${portmap[${{ github.event.inputs.app_name }}]}
+      - name: Build and push
+        uses: docker/bake-action@v2.0.0
+        with:
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.docker_meta.outputs.bake-file }}
+          set: |
+            image.args.BUILD_DATE=${{ steps.gen_date.outputs.build_date }}
+            image.args.APP=${{ github.event.inputs.app_name }}
+            image.args.EXPOSE_PORT=${{ steps.gen_release.outputs.app_port }}
+            image.args.PULL_REQUEST_BRANCH=${{ github.event.inputs.pr_branch }}
+            image.args.PULL_REQUEST_RELEASE=${{ github.event.inputs.pr_version }}
+          targets: all
+          push: true
+      - name: Push to Scarf
+        id: push_scarf
+        run: |
+          PACKAGE_UUID=$(curl -s -H "Authorization: Bearer ${{ secrets.scarf_token }}" https://scarf.sh/api/v1/organizations/linuxserver-ci/packages | jq -r '.[] | select(.name=="${{ github.repository_owner }}/prarr") | .uuid')
+          if [ -z "${PACKAGE_UUID}" ]; then
+            echo "Adding package to Scarf.sh"
+            curl -sX POST https://scarf.sh/api/v1/organizations/linuxserver-ci/packages -H "Authorization: Bearer ${{ secrets.scarf_token }}" -H "Content-Type: application/json" \
+              -d '{"name":"${{ github.repository_owner }}/prarr","shortDescription":"example description","libraryType":"docker","website":"https://github.com/${{ github.repository_owner }}/prarr","backendUrl":"https://ghcr.io/${{ github.repository_owner }}/prarr","publicUrl":"https://lscr.io/${{ github.repository_owner }}/prarr"}'
+          else
+            echo "Package already exists on Scarf.sh"
+          fi
