@@ -1,0 +1,53 @@
+name: Build baseimage
+
+on:
+  push:
+    paths:
+      - "Dockerfile.base"
+      - ".github/workflows/build-base-image.yml"
+    branches:
+      - main
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v4.0.1
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/prarr
+          labels: |
+            org.opencontainers.image.title=prarr
+            org.opencontainers.image.description=prarr base
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+          flavor: |
+            prefix=baseimage-,onlatest=true
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2.0.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate build date
+        id: gen_date
+        run: |
+          BUILD_DATE=$(date '+%Y-%m-%dT%H:%M:%S%:z')
+          echo "**** Setting build date to $BUILD_DATE ****"
+          echo ::set-output name=build_date::${BUILD_DATE}
+      - name: Build and push
+        uses: docker/bake-action@v2.0.0
+        with:
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.docker_meta.outputs.bake-file }}
+          set: |
+            image.args.BUILD_DATE=${{ steps.gen_date.outputs.build_date }}
+          targets: base
+          push: true
