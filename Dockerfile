@@ -15,11 +15,17 @@ RUN \
   if [ ${APP} == "lidarr" ]; then \
     apk add --no-cache chromaprint; \
   fi && \
+  case "$(uname -m)" in \
+    'x86_64') export ARCH='x64' ;; \
+    'aarch64') export ARCH='arm64' ;; \
+    'armv7l') export ARCH='arm' ;; \
+  esac && \
   echo "**** install ${APP} ****" && \
   mkdir -p "/app/${APP}/bin" && \
+  echo "https://${APP}.servarr.com/v1/update/${PULL_REQUEST_BRANCH}/updatefile?version=${PULL_REQUEST_RELEASE}&os=linuxmusl&runtime=netcore&arch=${ARCH}" && \
   curl -o \
     /tmp/app.tar.gz -L \
-    "https://${APP}.servarr.com/v1/update/${PULL_REQUEST_BRANCH}/updatefile?version=${PULL_REQUEST_RELEASE}&os=linuxmusl&runtime=netcore&arch=x64" && \
+    "https://${APP}.servarr.com/v1/update/${PULL_REQUEST_BRANCH}/updatefile?version=${PULL_REQUEST_RELEASE}&os=linuxmusl&runtime=netcore&arch=${ARCH}" && \
   tar xzf \
     /tmp/app.tar.gz -C \
     /app/${APP}/bin --strip-components=1 && \
