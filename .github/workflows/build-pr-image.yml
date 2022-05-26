@@ -56,7 +56,7 @@ jobs:
       - name: Generate outputs
         id: gen_release
         run: |
-          declare -A portmap=(["radarr"]="7878" ["readarr"]="8787" ["prowlarr"]="9696" ["lidarr"]="8686" ["whisparr"]="6969")
+          declare -A portmap=(["radarr"]="7878" ["readarr"]="8787" ["prowlarr"]="9696" ["lidarr"]="8686" ["whisparr"]="6969" ["sonarr"]="8989")
           echo ::set-output name=app_port::${portmap[${{ github.event.inputs.app_name }}]}
       - name: Build and push
         uses: docker/bake-action@v2.0.0
