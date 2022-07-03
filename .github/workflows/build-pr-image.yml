@@ -22,6 +22,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Generate metadata
+        id: gen_meta
+        run: |
+          echo "::set-output name=app_name::${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]'
+          echo "::set-output name=pr_branch::${{ github.event.inputs.pr_branch }}" | tr '[:upper:]' '[:lower:]'
+          echo "::set-output name=pr_version::${{ github.event.inputs.pr_version }}" | tr '[:upper:]' '[:lower:]'
+
       - name: Docker meta
         id: docker_meta
         uses: docker/metadata-action@v4.0.1
@@ -29,14 +37,14 @@ jobs:
           images: |
             ghcr.io/${{ github.repository_owner }}/prarr
           labels: |
-            org.opencontainers.image.title=${{ github.event.inputs.app_name }}
-            org.opencontainers.image.description=${{ github.event.inputs.app_name }}
+            org.opencontainers.image.title=${{ steps.gen_meta.outputs.app_name }}
+            org.opencontainers.image.description=${{ steps.gen_meta.outputs.app_name }}
             org.opencontainers.image.vendor=${{ github.repository_owner }}
           tags: |
-            type=raw,value=${{ github.event.inputs.pr_branch }}
-            type=raw,value=${{ github.event.inputs.pr_branch }}-${{ github.event.inputs.pr_version }}
+            type=raw,value=${{ steps.gen_meta.outputs.pr_branch }}
+            type=raw,value=${{ steps.gen_meta.outputs.pr_branch }}-${{ steps.gen_meta.outputs.pr_version }}
           flavor: |
-            prefix=${{ github.event.inputs.app_name }}-,onlatest=true
+            prefix=${{ steps.gen_meta.outputs.app_name }}-,onlatest=true
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -57,7 +65,7 @@ jobs:
         id: gen_release
         run: |
           declare -A portmap=(["radarr"]="7878" ["readarr"]="8787" ["prowlarr"]="9696" ["lidarr"]="8686" ["whisparr"]="6969" ["sonarr"]="8989")
-          echo ::set-output name=app_port::${portmap[${{ github.event.inputs.app_name }}]}
+          echo ::set-output name=app_port::${portmap[${{ steps.gen_meta.outputs.app_name }}]}
       - name: Build and push
         uses: docker/bake-action@v2.1.0
         with:
@@ -66,10 +74,10 @@ jobs:
             ${{ steps.docker_meta.outputs.bake-file }}
           set: |
             image.args.BUILD_DATE=${{ steps.gen_date.outputs.build_date }}
-            image.args.APP=${{ github.event.inputs.app_name }}
+            image.args.APP=${{ steps.gen_meta.outputs.app_name }}
             image.args.EXPOSE_PORT=${{ steps.gen_release.outputs.app_port }}
-            image.args.PULL_REQUEST_BRANCH=${{ github.event.inputs.pr_branch }}
-            image.args.PULL_REQUEST_RELEASE=${{ github.event.inputs.pr_version }}
+            image.args.PULL_REQUEST_BRANCH=${{ steps.gen_meta.outputs.pr_branch }}
+            image.args.PULL_REQUEST_RELEASE=${{ steps.gen_meta.outputs.pr_version }}
           targets: all
           push: true
       - name: Push to Scarf
