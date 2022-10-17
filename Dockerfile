@@ -31,8 +31,7 @@ RUN \
     /app/${APP}/bin --strip-components=1 && \
   echo -e "UpdateMethod=docker\nBranch=${PULL_REQUEST_BRANCH}\nPackageVersion=${PULL_REQUEST_RELEASE}\nPackageAuthor=[linuxserver.io](https://www.linuxserver.io/)" > "/app/${APP}/package_info" && \
   /bin/bash -c " \
-  printf \"\$(cat /etc/services.d/app/run)\" \${APP} \${APP} \${APP^} > /etc/services.d/app/run && \
-  mv /etc/services.d/app /etc/services.d/\${APP}  && \
+  printf \"\$(cat /etc/s6-overlay/s6-rc.d/svc-prarr/run)\" \${EXPOSE_PORT} \${APP} \${APP} \${APP^} > /etc/s6-overlay/s6-rc.d/svc-prarr/run && \
   echo \"**** cleanup ****\" && \
   rm -rf \
     \"/app/\${APP}/bin/\${APP^}.Update\" \
