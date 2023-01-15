@@ -26,9 +26,9 @@ jobs:
       - name: Generate metadata
         id: gen_meta
         run: |
-          echo "::set-output name=app_name::${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]'
-          echo "::set-output name=pr_branch::${{ github.event.inputs.pr_branch }}" | tr '[:upper:]' '[:lower:]'
-          echo "::set-output name=pr_version::${{ github.event.inputs.pr_version }}" | tr '[:upper:]' '[:lower:]'
+          echo "app_name=${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]'" >> $GITHUB_OUTPUT
+          echo "pr_branch=${{ github.event.inputs.pr_branch }}" | tr '[:upper:]' '[:lower:]'" >> $GITHUB_OUTPUT
+          echo "pr_version=${{ github.event.inputs.pr_version }}" | tr '[:upper:]' '[:lower:]'" >> $GITHUB_OUTPUT
 
       - name: Docker meta
         id: docker_meta
@@ -60,12 +60,12 @@ jobs:
         run: |
           BUILD_DATE=$(date '+%Y-%m-%dT%H:%M:%S%:z')
           echo "**** Setting build date to $BUILD_DATE ****"
-          echo ::set-output name=build_date::${BUILD_DATE}
+          echo "build_date=${BUILD_DATE}" >> $GITHUB_OUTPUT
       - name: Generate outputs
         id: gen_release
         run: |
           declare -A portmap=(["radarr"]="7878" ["readarr"]="8787" ["prowlarr"]="9696" ["lidarr"]="8686" ["whisparr"]="6969" ["sonarr"]="8989")
-          echo ::set-output name=app_port::${portmap[${{ steps.gen_meta.outputs.app_name }}]}
+          echo "app_port=${portmap[${{ steps.gen_meta.outputs.app_name }}]}" >> $GITHUB_OUTPUT
       - name: Build and push
         uses: docker/bake-action@v2.3.0
         with:

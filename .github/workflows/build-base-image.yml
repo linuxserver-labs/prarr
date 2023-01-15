@@ -40,7 +40,7 @@ jobs:
         run: |
           BUILD_DATE=$(date '+%Y-%m-%dT%H:%M:%S%:z')
           echo "**** Setting build date to $BUILD_DATE ****"
-          echo ::set-output name=build_date::${BUILD_DATE}
+          echo "build_date=${BUILD_DATE}" >> $GITHUB_OUTPUT
       - name: Build and push
         uses: docker/bake-action@v2.3.0
         with:
