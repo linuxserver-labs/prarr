@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM ghcr.io/linuxserver-labs/prarr:baseimage-main
 
 # set version label
