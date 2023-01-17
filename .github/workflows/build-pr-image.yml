@@ -26,9 +26,9 @@ jobs:
       - name: Generate metadata
         id: gen_meta
         run: |
-          echo "app_name=${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]'" >> $GITHUB_OUTPUT
-          echo "pr_branch=${{ github.event.inputs.pr_branch }}" | tr '[:upper:]' '[:lower:]'" >> $GITHUB_OUTPUT
-          echo "pr_version=${{ github.event.inputs.pr_version }}" | tr '[:upper:]' '[:lower:]'" >> $GITHUB_OUTPUT
+          echo "app_name=${{ github.event.inputs.app_name }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
+          echo "pr_branch=${{ github.event.inputs.pr_branch }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
+          echo "pr_version=${{ github.event.inputs.pr_version }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
 
       - name: Docker meta
         id: docker_meta
