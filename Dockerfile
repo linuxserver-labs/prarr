@@ -20,7 +20,6 @@ RUN \
   case "$(uname -m)" in \
     'x86_64') export ARCH='x64' ;; \
     'aarch64') export ARCH='arm64' ;; \
-    'armv7l') export ARCH='arm' ;; \
   esac && \
   echo "**** install ${APP} ****" && \
   mkdir -p "/app/${APP}/bin" && \
