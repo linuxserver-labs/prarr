@@ -43,7 +43,7 @@ jobs:
           echo "**** Setting build date to $BUILD_DATE ****"
           echo "build_date=${BUILD_DATE}" >> $GITHUB_OUTPUT
       - name: Build and push
-        uses: docker/bake-action@v2.3.0
+        uses: docker/bake-action@v4.0.0
         with:
           files: |
             ./docker-bake.hcl
