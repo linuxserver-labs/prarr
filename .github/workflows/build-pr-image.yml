@@ -46,7 +46,7 @@ jobs:
           flavor: |
             prefix=${{ steps.gen_meta.outputs.app_name }}-,onlatest=true
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3.0.0
       - name: Login to GitHub Container Registry
