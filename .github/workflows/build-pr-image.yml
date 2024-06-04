@@ -80,14 +80,3 @@ jobs:
             image.args.PULL_REQUEST_RELEASE=${{ steps.gen_meta.outputs.pr_version }}
           targets: all
           push: true
-      - name: Push to Scarf
-        id: push_scarf
-        run: |
-          PACKAGE_UUID=$(curl -s -H "Authorization: Bearer ${{ secrets.scarf_token }}" https://scarf.sh/api/v1/organizations/linuxserver-ci/packages | jq -r '.[] | select(.name=="${{ github.repository_owner }}/prarr") | .uuid')
-          if [ -z "${PACKAGE_UUID}" ]; then
-            echo "Adding package to Scarf.sh"
-            curl -sX POST https://scarf.sh/api/v1/organizations/linuxserver-ci/packages -H "Authorization: Bearer ${{ secrets.scarf_token }}" -H "Content-Type: application/json" \
-              -d '{"name":"${{ github.repository_owner }}/prarr","shortDescription":"example description","libraryType":"docker","website":"https://github.com/${{ github.repository_owner }}/prarr","backendUrl":"https://ghcr.io/${{ github.repository_owner }}/prarr","publicUrl":"https://lscr.io/${{ github.repository_owner }}/prarr"}'
-          else
-            echo "Package already exists on Scarf.sh"
-          fi
