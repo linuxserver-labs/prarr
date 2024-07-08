@@ -67,7 +67,7 @@ jobs:
           declare -A portmap=(["radarr"]="7878" ["readarr"]="8787" ["prowlarr"]="9696" ["lidarr"]="8686" ["whisparr"]="6969" ["sonarr"]="8989")
           echo "app_port=${portmap[${{ steps.gen_meta.outputs.app_name }}]}" >> $GITHUB_OUTPUT
       - name: Build and push
-        uses: docker/bake-action@v5.2.0
+        uses: docker/bake-action@v5.3.0
         with:
           files: |
             ./docker-bake.hcl
