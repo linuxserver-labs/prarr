@@ -11,7 +11,7 @@ ARG PULL_REQUEST_RELEASE
 LABEL build_version="Linuxserver.io Build-date:- ${BUILD_DATE}"
 LABEL maintainer="Roxedus"
 
-ENV XDG_CONFIG_HOME="/config/xdg"
+ENV TMPDIR=/run/${APP}-temp
 
 RUN \
   if [ ${APP} == "lidarr" ]; then \
@@ -33,7 +33,8 @@ RUN \
   echo -e "UpdateMethod=docker\nBranch=${PULL_REQUEST_BRANCH}\nPackageVersion=${PULL_REQUEST_RELEASE}\nPackageAuthor=[linuxserver.io](https://www.linuxserver.io/)" > "/app/${APP}/package_info" && \
   printf "Linuxserver.io LABS \nPRARR app: ${APP}\nBranch: ${PULL_REQUEST_BRANCH}\nVersion: ${PULL_REQUEST_RELEASE}\nBuild-date: ${BUILD_DATE}" > /build_version && \
   /bin/bash -c " \
-  printf \"\$(cat /etc/s6-overlay/s6-rc.d/svc-prarr/run)\" \${APP} \${APP} \${APP^} > /etc/s6-overlay/s6-rc.d/svc-prarr/run && \
+  printf \"\$(cat /etc/s6-overlay/s6-rc.d/svc-prarr/run)\" \${APP} \${APP} \${APP^} \${APP} \${APP} \${APP^} > /etc/s6-overlay/s6-rc.d/svc-prarr/run && \
+  printf \"\$(cat /etc/s6-overlay/s6-rc.d/init-prarr-config/run)\" \${APP} \${APP} > /etc/s6-overlay/s6-rc.d/init-prarr-config/run && \
   printf \"\$(cat /etc/s6-overlay/s6-rc.d/svc-prarr/data/check)\" \${EXPOSE_PORT} > /etc/s6-overlay/s6-rc.d/svc-prarr/data/check && \
   echo \"**** cleanup ****\" && \
   rm -rf \

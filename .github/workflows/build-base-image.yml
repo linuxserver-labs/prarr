@@ -1,6 +1,8 @@
 name: Build baseimage
 
 on:
+  schedule:
+    - cron:  "54 6 1,15 * *"
   push:
     paths:
       - "Dockerfile.base"
@@ -43,7 +45,7 @@ jobs:
           echo "**** Setting build date to $BUILD_DATE ****"
           echo "build_date=${BUILD_DATE}" >> $GITHUB_OUTPUT
       - name: Build and push
-        uses: docker/bake-action@v6.7.0
+        uses: docker/bake-action@v5.7.0
         with:
           files: |
             ./docker-bake.hcl
