@@ -1,6 +1,8 @@
 name: Build baseimage
 
 on:
+  schedule:
+    - cron:  "54 6 1,15 * *"
   push:
     paths:
       - "Dockerfile.base"
