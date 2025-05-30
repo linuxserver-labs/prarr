@@ -1,6 +1,10 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-# permissions
-chown -R abc:abc \
-    /config
+mkdir -p /run/%s-temp
+
+if [[ -z ${LSIO_NON_ROOT_USER} ]]; then
+    lsiown -R abc:abc \
+        /config \
+        /run/%s-temp
+fi
