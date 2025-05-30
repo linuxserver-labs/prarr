@@ -8,7 +8,8 @@ LABEL build_version="Linuxserver.io Build-date:- ${BUILD_DATE}"
 LABEL maintainer="Roxedus"
 
 # environment settings
-ENV XDG_CONFIG_HOME="/config/xdg"
+ENV XDG_CONFIG_HOME="/config/xdg" \
+  COMPlus_EnableDiagnostics=0
 
 RUN \
   echo "**** install packages ****" && \
